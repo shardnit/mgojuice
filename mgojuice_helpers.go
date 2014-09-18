@@ -8,11 +8,11 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func FindById(C interface{}, coll string, id string) error {
+func FindById(C interface{}, coll string, id string, selector interface{}) error {
 	if err := Execute("monotonic", coll,
 		func(collection *mgo.Collection) error {
 			glog.Infof("Finding id[%s] in collection[%s]", id, coll)
-			return collection.FindId(bson.ObjectIdHex(id)).One(C)
+			return collection.FindId(bson.ObjectIdHex(id)).Select(selector).One(C)
 		}); err != nil {
 		return err
 	}
