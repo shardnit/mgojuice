@@ -48,7 +48,8 @@ type (
 
 	// DBCall defines a type of function that can be used
 	// to excecute code against MongoDB.
-	DBCall func(*mgo.Collection) error
+	DBCall       func(*mgo.Collection) error
+	DBUpdateCall func(*mgo.Collection) (*mgo.ChangeInfo, error)
 )
 
 // Startup brings the manager to a running state.
@@ -300,10 +301,37 @@ func Execute(sessionName string, collectionName string, dbCall DBCall) error {
 	// Execute the MongoDB call.
 	err = dbCall(collection)
 	if err != nil {
-		glog.Info(err)
+		glog.Error(err)
 		return err
 	}
 
+	glog.Info("Execute completed")
+	return nil
+}
+
+// Execute Mongos find and modify method
+func FindAndModify(sessionName string, collectionName string, dbCall DBUpdateCall) error {
+	mongoSession, err := PrepareMongoSession(sessionName)
+	if err != nil {
+		return err
+	}
+	defer CloseSession(mongoSession)
+	glog.Infof("Execute: Database[%s] Collection[%s]", mongoSession.DB("").Name, collectionName)
+
+	/* Capture the specified collection.
+	DB returns a value representing the named database. If name is empty, the database name provided
+	in the dialed URL is used instead. If that is also empty, "test" is used as a fallback in a way equivalent to the mongo shell.*/
+
+	collection := GetCollection(mongoSession, mongoSession.DB("").Name, collectionName)
+
+	// Execute the MongoDB call.
+	info, err := dbCall(collection)
+	if err != nil {
+		glog.Error(err)
+		return err
+	}
+
+	glog.Info(info)
 	glog.Info("Execute completed")
 	return nil
 }
