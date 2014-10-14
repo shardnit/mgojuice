@@ -47,6 +47,16 @@ func InsertTestDocument(coll string, docs ...interface{}) error {
 	return nil
 }
 
+func RemoveDocId(coll string, id string) error {
+	if err := Execute("monotonic", coll,
+		func(collection *mgo.Collection) error {
+			glog.Infof("Removing id[%s] in collection[%s]", id, coll)
+			return collection.RemoveId(bson.ObjectIdHex(id))
+		}); err != nil {
+		return err
+	}
+	return nil
+}
 func EmptyTestColl(coll string) error {
 	if err := Execute("master", coll,
 		func(collection *mgo.Collection) error {
