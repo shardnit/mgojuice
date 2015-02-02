@@ -69,7 +69,7 @@ func Startup() error {
 	}
 
 	if ret_val, err := utilities.IsStructEmpty(&config); err != nil {
-		glog.Warningf("%s", err)
+		return err
 	} else if ret_val {
 		glog.Warning("Using default values of unset ENV variables for MongoDB connection")
 	}
