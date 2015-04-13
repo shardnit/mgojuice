@@ -19,6 +19,17 @@ func FindById(C interface{}, coll string, id string, selector interface{}) error
 	return nil
 }
 
+func FindByPrimaryKey(C interface{}, coll string, primaryKey string, value string) error {
+	if err := Execute("monotonic", coll,
+		func(collection *mgo.Collection) error {
+			glog.Infof("Finding field[%s] with value[%s] in collection[%s]", primaryKey, value, coll)
+			return collection.Find(bson.M{primaryKey: value}).One(C)
+		}); err != nil {
+		return err
+	}
+	return nil
+}
+
 func PrepareMongoSession(sessionConst string) (*mgo.Session, error) {
 	var session *mgo.Session
 	var err error
