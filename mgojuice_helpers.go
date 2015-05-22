@@ -11,7 +11,9 @@ import (
 func FindById(C interface{}, coll string, id string, selector interface{}) error {
 	if err := Execute("monotonic", coll,
 		func(collection *mgo.Collection) error {
-			glog.Infof("Finding id[%s] in collection[%s]", id, coll)
+			if glog.V(2) {
+				glog.Infof("Finding id[%s] in collection[%s]", id, coll)
+			}
 			return collection.FindId(bson.ObjectIdHex(id)).Select(selector).One(C)
 		}); err != nil {
 		return err
@@ -22,7 +24,9 @@ func FindById(C interface{}, coll string, id string, selector interface{}) error
 func FindByPrimaryKey(C interface{}, coll string, primaryKey string, value string) error {
 	if err := Execute("monotonic", coll,
 		func(collection *mgo.Collection) error {
-			glog.Infof("Finding field[%s] with value[%s] in collection[%s]", primaryKey, value, coll)
+			if glog.V(2) {
+				glog.Infof("Finding field[%s] with value[%s] in collection[%s]", primaryKey, value, coll)
+			}
 			return collection.Find(bson.M{primaryKey: value}).One(C)
 		}); err != nil {
 		return err
@@ -61,7 +65,9 @@ func InsertTestDocument(coll string, docs ...interface{}) error {
 func RemoveDocId(coll string, id string) error {
 	if err := Execute("monotonic", coll,
 		func(collection *mgo.Collection) error {
-			glog.Infof("Removing id[%s] in collection[%s]", id, coll)
+			if glog.V(2) {
+				glog.Infof("Removing id[%s] in collection[%s]", id, coll)
+			}
 			return collection.RemoveId(bson.ObjectIdHex(id))
 		}); err != nil {
 		return err

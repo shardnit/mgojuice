@@ -59,7 +59,9 @@ func Startup() error {
 		return nil
 	}
 
-	glog.Info("Application Startup!")
+	if glog.V(2) {
+		glog.Info("Application Startup!")
+	}
 
 	// Pull in the configuration.
 	var config mongoConfiguration
@@ -80,9 +82,11 @@ func Startup() error {
 	}
 
 	// Log the mongodb connection straps.
-	glog.Infof("Startup - MongoDB : Hosts[%s]", config.Hosts)
-	glog.Infof("Startup - MongoDB : Database[%s]", config.Database)
-	glog.Infof("Startup - MongoDB : Username[%s]", config.UserName)
+	if glog.V(2) {
+		glog.Infof("Startup - MongoDB : Hosts[%s]", config.Hosts)
+		glog.Infof("Startup - MongoDB : Database[%s]", config.Database)
+		glog.Infof("Startup - MongoDB : Username[%s]", config.UserName)
+	}
 
 	hosts := strings.Split(config.Hosts, ",")
 
@@ -98,26 +102,34 @@ func Startup() error {
 		return err
 	}
 
-	glog.Info("Startup completed!")
+	if glog.V(2) {
+		glog.Info("Startup completed!")
+	}
 	return nil
 }
 
 // Shutdown systematically brings the manager down gracefully.
 func Shutdown() error {
-	glog.Info("Shutdown starting ..")
+	if glog.V(2) {
+		glog.Info("Shutdown starting ..")
+	}
 
 	// Close the databases
 	for _, session := range singleton.sessions {
 		CloseSession(session.mongoSession)
 	}
 
-	glog.Info("Shutdown completed")
+	if glog.V(2) {
+		glog.Info("Shutdown completed")
+	}
 	return nil
 }
 
 // CreateSession creates a connection pool for use.
 func CreateSession(mode string, sessionName string, hosts []string, databaseName string, username string, password string) error {
-	glog.Infof("CreateSession - Mode[%s] SessionName[%s] Hosts[%s] DatabaseName[%s] Username[%s]", mode, sessionName, hosts, databaseName, username)
+	if glog.V(2) {
+		glog.Infof("CreateSession - Mode[%s] SessionName[%s] Hosts[%s] DatabaseName[%s] Username[%s]", mode, sessionName, hosts, databaseName, username)
+	}
 
 	// Create the database object
 	mongoSession := mongoSession{
@@ -134,7 +146,9 @@ func CreateSession(mode string, sessionName string, hosts []string, databaseName
 	var err error
 	mongoSession.mongoSession, err = mgo.DialWithInfo(mongoSession.mongoDBDialInfo)
 	if err != nil {
-		glog.Infof("CreateSession error [%s]", err)
+		if glog.V(2) {
+			glog.Infof("CreateSession error [%s]", err)
+		}
 		return err
 	}
 
@@ -164,7 +178,9 @@ func CreateSession(mode string, sessionName string, hosts []string, databaseName
 	singleton.sessions[sessionName] = mongoSession
 	glog.Info(mongoSession.mongoSession.BuildInfo())
 
-	glog.Info("CreateSession completed")
+	if glog.V(2) {
+		glog.Info("CreateSession completed")
+	}
 	return nil
 }
 
@@ -180,7 +196,9 @@ func CopyMonotonicSession() (*mgo.Session, error) {
 
 // CopySession makes a copy of the specified session for client use.
 func CopySession(useSession string) (*mgo.Session, error) {
-	glog.Infof("CopySession UseSession[%s]", useSession)
+	if glog.V(2) {
+		glog.Infof("CopySession UseSession[%s]", useSession)
+	}
 
 	// Find the session object.
 	session := singleton.sessions[useSession]
@@ -194,7 +212,9 @@ func CopySession(useSession string) (*mgo.Session, error) {
 	// Copy the master session.
 	mongoSession := session.mongoSession.Copy()
 
-	glog.Info("CopySession completed")
+	if glog.V(2) {
+		glog.Info("CopySession completed")
+	}
 	return mongoSession, nil
 }
 
@@ -210,7 +230,9 @@ func CloneMonotonicSession() (*mgo.Session, error) {
 
 // CloneSession makes a clone of the specified session for client use.
 func CloneSession(useSession string) (*mgo.Session, error) {
-	glog.Info("CloneSession started: UseSession[%s]", useSession)
+	if glog.V(2) {
+		glog.Info("CloneSession started: UseSession[%s]", useSession)
+	}
 
 	// Find the session object.
 	session := singleton.sessions[useSession]
@@ -224,15 +246,21 @@ func CloneSession(useSession string) (*mgo.Session, error) {
 	// Clone the master session.
 	mongoSession := session.mongoSession.Clone()
 
-	glog.Info("CloneSession completed")
+	if glog.V(2) {
+		glog.Info("CloneSession completed")
+	}
 	return mongoSession, nil
 }
 
 // CloseSession puts the connection back into the pool.
 func CloseSession(mongoSession *mgo.Session) {
-	glog.Info("CloseSession started")
+	if glog.V(2) {
+		glog.Info("CloseSession started")
+	}
 	mongoSession.Close()
-	glog.Info("CloseSession completed")
+	if glog.V(2) {
+		glog.Info("CloseSession completed")
+	}
 }
 
 // GetDatabase returns a reference to the specified database.
@@ -290,7 +318,9 @@ func Execute(sessionName string, collectionName string, dbCall DBCall) error {
 		return err
 	}
 	defer CloseSession(mongoSession)
-	glog.Infof("Execute: Database[%s] Collection[%s]", mongoSession.DB("").Name, collectionName)
+	if glog.V(2) {
+		glog.Infof("Execute: Database[%s] Collection[%s]", mongoSession.DB("").Name, collectionName)
+	}
 
 	/* Capture the specified collection.
 	DB returns a value representing the named database. If name is empty, the database name provided
@@ -305,7 +335,10 @@ func Execute(sessionName string, collectionName string, dbCall DBCall) error {
 		return err
 	}
 
-	glog.Info("Execute completed")
+	if glog.V(2) {
+		glog.Info("Execute completed")
+	}
+
 	return nil
 }
 
@@ -316,7 +349,10 @@ func FindAndModify(sessionName string, collectionName string, dbCall DBUpdateCal
 		return err
 	}
 	defer CloseSession(mongoSession)
-	glog.Infof("Execute: Database[%s] Collection[%s]", mongoSession.DB("").Name, collectionName)
+
+	if glog.V(2) {
+		glog.Infof("Execute: Database[%s] Collection[%s]", mongoSession.DB("").Name, collectionName)
+	}
 
 	/* Capture the specified collection.
 	DB returns a value representing the named database. If name is empty, the database name provided
@@ -331,7 +367,9 @@ func FindAndModify(sessionName string, collectionName string, dbCall DBUpdateCal
 		return err
 	}
 
-	glog.Info(info)
-	glog.Info("Execute completed")
+	if glog.V(2) {
+		glog.Info(info)
+		glog.Info("Execute completed")
+	}
 	return nil
 }
