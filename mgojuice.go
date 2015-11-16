@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TripolisSolutions/tokyo_campaign_engine/utilities"
 	"github.com/golang/glog"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/mgo.v2"
@@ -67,6 +68,12 @@ func Startup() error {
 	if err := envconfig.Process("mongodb", &config); err != nil {
 		glog.Fatalf("Error[%s] while fetching ENV variables on Startup", err)
 		return err
+	}
+
+	if ret_val, err := utilities.IsStructEmpty(&config); err != nil {
+		return err
+	} else if ret_val {
+		glog.Warning("Using default values of unset ENV variables for MongoDB connection")
 	}
 
 	// Create the Mongo Manager.
