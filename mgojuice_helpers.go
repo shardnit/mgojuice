@@ -14,7 +14,7 @@ func FindById(C interface{}, coll string, id string, selector interface{}) error
 			if glog.V(2) {
 				glog.Infof("Finding id[%s] in collection[%s]", id, coll)
 			}
-			return collection.FindId(bson.ObjectIdHex(id)).Select(selector).One(C)
+			return collection.FindId(id).Select(selector).One(C)
 		}); err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func RemoveDocId(coll string, id string) error {
 			if glog.V(2) {
 				glog.Infof("Removing id[%s] in collection[%s]", id, coll)
 			}
-			return collection.RemoveId(bson.ObjectIdHex(id))
+			return collection.RemoveId(id)
 		}); err != nil {
 		return err
 	}
